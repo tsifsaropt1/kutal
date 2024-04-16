@@ -9,15 +9,18 @@ const int servox_pin = 3;
 const int servoy_pin = 4;
 
 long accelX, accelY, accelZ;
-float gForceX, gForceY, gForceZ;
+float gForceX, gForceY, gForceZ; //dexrhsimopoieitai
 
 long gyroX, gyroY, gyroZ;
-float rotX, rotY, rotZ;
-float gyroX_cal, gyroY_cal, gyroZ_cal;
+float rotX, rotY, rotZ; //dexrhsimopoieitai
+float gyroX_cal, gyroY_cal, gyroZ_cal; 
+float accelX, accelY, accelZ;
+float angleX_cal,angleY_cal, angleZ_cal ;
 float angle_pitch, angle_roll;
-float angle_roll_acc, angle_pitch_acc;
-float angle_pitch_output, angle_roll_output;
-int acc_calibration_value = 1000; // Enter the accelerometer calibration value
+float accel_pitch, accel_roll;
+float angle_roll_acc, angle_pitch_acc; //dexrhsimopoieitai
+float angle_pitch_output, angle_roll_output; //dexrhsimopoieitai
+int acc_calibration_value = 1000; // Enter the accelerometer calibration value, //dexrhsimopoieitai
 float angle_acc;
 
 long loop_timer;
@@ -102,7 +105,7 @@ void setup() {
   delay(1000);
 
   setupMPU();
-
+//GIA TO GYRO
   for (int i = 0; i < 500; i++) {
     recordGyroRegisters();
     gyroX_cal += gyroX;
@@ -119,6 +122,24 @@ void setup() {
   Serial.print("  gyroZ_cal: ");
   Serial.println(gyroZ_cal);
 
+//GIA ACCEL
+  for (int i = 0; i < 500; i++) {
+    recordAccelRegisters();
+    accelX_cal += accelX;
+    accelY_cal += accelY;
+    accelZ_cal += accelZ;
+  }
+  accelX_cal /= 500;
+  accelY_cal /= 500;
+  accelZ_cal /= 500;
+  Serial.print("accelX_cal: ");
+  Serial.print(accelX_cal);
+  Serial.print("  accelY_cal: ");
+  Serial.print(accelY_cal);
+  Serial.print("  accelZ_cal: ");
+  Serial.println(accel_cal);
+
+
   loop_timer = micros(); //diavazei to current time k to apothikeyei sto loop timer.
 }
 
@@ -131,13 +152,26 @@ void loop() {
   gyroY -= gyroY_cal; 
   gyroZ -= gyroZ_cal;
 
+
+  accelX -= accelX_cal;
+  accelY -= accelY_cal; 
+  accelZ -= accelZ_cal;
+
   angle_pitch += gyroX * 0.000122; //conversion factor. Oloklhrvnei to dω, metatrepei se Δθ, kai to prosthetei
   //sto angle pitch, etsi wste na jeroume kathe stigmh ti prosanatolismo exei. EINAI SYGKEKRIMENH THESH OXI ΔΙΑΣΤΗΜΑ
+  //TO GYRO X DEN EINAI DEGRESS/SEC, ALLA ANTIPROSWPEYEI RAW VALUE!!
   angle_roll += gyroY * 0.000122;
 
   angle_pitch += angle_roll * sin(gyroZ * 0.000002131); //corrections factors epeidh peristrofh ston y k z axona
   //ephreasoun ton x ajona
   angle_roll -= angle_pitch * sin(gyroZ * 0.000002131);
+
+   float accel_pitch = atan2(-accelX, sqrt(accelY * accelY + accelZ * accelZ)) * 180 / M_PI;
+   float accel_roll -= angle_pitch * sin(gyroZ * 0.000002131); // Apply correction for gyroZ to roll
+
+  // Apply complementary filter to combine gyro and accelerometer data
+  angle_pitch = 0.98 * (angle_pitch + accel_pitch) + 0.02 * accel_pitch; // Adjust alpha values as needed
+  angle_roll = 0.98 * (angle_roll + accel_roll) + 0.02 * accel_roll; // Adjust alpha values as needed
 
   servoXpos = map(angle_roll, 90.00, -90.00, 0, 180);
   servoYpos = map(angle_pitch, -90.00, 90.00, 0, 180);
