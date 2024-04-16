@@ -8,13 +8,13 @@ Servo servoy;
 const int servox_pin = 3;
 const int servoy_pin = 4;
 
-long accelX, accelY, accelZ;
 float gForceX, gForceY, gForceZ; //dexrhsimopoieitai
 
 long gyroX, gyroY, gyroZ;
 float rotX, rotY, rotZ; //dexrhsimopoieitai
 float gyroX_cal, gyroY_cal, gyroZ_cal; 
 float accelX, accelY, accelZ;
+float accelX_cal, accelY_cal, accelZ_cal;
 float angleX_cal,angleY_cal, angleZ_cal ;
 float angle_pitch, angle_roll;
 float accel_pitch, accel_roll;
@@ -137,7 +137,7 @@ void setup() {
   Serial.print("  accelY_cal: ");
   Serial.print(accelY_cal);
   Serial.print("  accelZ_cal: ");
-  Serial.println(accel_cal);
+  Serial.println(accelZ_cal);
 
 
   loop_timer = micros(); //diavazei to current time k to apothikeyei sto loop timer.
@@ -167,7 +167,7 @@ void loop() {
   angle_roll -= angle_pitch * sin(gyroZ * 0.000002131);
 
    float accel_pitch = atan2(-accelX, sqrt(accelY * accelY + accelZ * accelZ)) * 180 / M_PI;
-   float accel_roll -= angle_pitch * sin(gyroZ * 0.000002131); // Apply correction for gyroZ to roll
+   float accel_roll = angle_pitch * sin(gyroZ * 0.000002131); // Apply correction for gyroZ to roll
 
   // Apply complementary filter to combine gyro and accelerometer data
   angle_pitch = 0.98 * (angle_pitch + accel_pitch) + 0.02 * accel_pitch; // Adjust alpha values as needed
