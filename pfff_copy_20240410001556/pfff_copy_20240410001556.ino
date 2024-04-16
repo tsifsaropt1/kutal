@@ -8,14 +8,15 @@ Servo servoy;
 const int servox_pin = 3;
 const int servoy_pin = 4;
 
+
 float gForceX, gForceY, gForceZ; //dexrhsimopoieitai
 
 long gyroX, gyroY, gyroZ;
 float rotX, rotY, rotZ; //dexrhsimopoieitai
 float gyroX_cal, gyroY_cal, gyroZ_cal; 
-float accelX, accelY, accelZ;
-float accelX_cal, accelY_cal, accelZ_cal;
-float angleX_cal,angleY_cal, angleZ_cal ;
+float accelX, accelY, accelZ ;
+float angleX_cal, angleY_cal, angleZ_cal ;
+float accelX_cal, accelY_cal, accelZ_cal ;
 float angle_pitch, angle_roll;
 float accel_pitch, accel_roll;
 float angle_roll_acc, angle_pitch_acc; //dexrhsimopoieitai
@@ -173,24 +174,28 @@ void loop() {
   angle_pitch = 0.98 * (angle_pitch + accel_pitch) + 0.02 * accel_pitch; // Adjust alpha values as needed
   angle_roll = 0.98 * (angle_roll + accel_roll) + 0.02 * accel_roll; // Adjust alpha values as needed
 
-  servoXpos = map(angle_roll, 90.00, -90.00, 0, 180);
-  servoYpos = map(angle_pitch, -90.00, 90.00, 0, 180);
+  servoXpos = map(angle_roll, 20.00, -20.00, 0, 180);
+  servoYpos = map(angle_pitch, -20.00, 20.00, 0, 180);
+
+Serial.print("angle_pitch:");
+Serial.println(angle_pitch);
+Serial.print("angle_roll:");
+Serial.println(angle_roll);
 
   count++;
-  while (micros() - loop_timer < 8000) {
-    if (count == 1) {
-      if (servoXpos >= 0 && servoXpos <= 180) {
-        servox.write(servoXpos);
-      }
-    }
-    if (count == 2) {
-      count = 0;
-      if (servoYpos >= 0 && servoYpos <= 180) {
-        servoy.write(servoYpos);
-      }
+  if (count == 1) {
+    if (servoXpos >= 0 && servoXpos <= 180) {
+      servox.write(servoXpos);
     }
   }
-  loop_timer += 8000;
+  if (count == 2) {
+    count = 0;
+    if (servoYpos >= 0 && servoYpos <= 180) {
+      servoy.write(servoYpos);
+    }
+  }
+
+  loop_timer = micros();
 }
 
 
